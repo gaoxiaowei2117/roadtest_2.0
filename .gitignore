@@ -1,0 +1,33 @@
+# Personal config — never commit. Use config.yml.example as a template.
+config.yml
+
+# Runtime data
+log/
+*.log
+last_run.txt
+booking_status.json
+processed_emails.txt
+token_cache*
+*.png
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+
+# Virtual environments
+.venv/
+venv/
+env/
+.browser-use-env/
+
+# Editor / OS / tooling
+.vscode/
+.idea/
+.claude/
+.DS_Store
+*.swp
+*~

@@ -1,0 +1,79 @@
+icbc:
+  drvrLastName: "YourLastName"       # 驾照姓
+  licenceNumber: "00000000"          # 驾照号
+  keyword: "0000"                    # ICBC keyword
+  expactAfterDate: "2026-07-01"      # 想约的最早日期
+  expactBeforeDate: "2026-08-31"     # 想约的最晚日期
+  expactTimeRange: "10:00-15:00"     # 想约的时间段
+  examClass: "5"                     # 5 = Class 5 路考
+  posID: "274"                       # 考点 ID
+  prfDaysOfWeek: "[0,1,2,3,4,5,6]"
+  prfPartsOfDay: "[0,1]"
+  DateOfIssue: "2025-JAN-01"         # 驾照发证日期 YYYY-MMM-DD
+
+pushsms:
+  enable: false
+  accountSid: ""
+  authToken: ""
+  fromNumber: ""
+  toNumber: ""
+
+pushdeer:
+  enable: false
+  key: ""
+
+ntfy:
+  enable: false
+  topic: ""
+
+pushlocal:
+  enable: false
+
+pushsound:
+  enable: false  # Set to true to enable sound notifications
+  audio_file: ""  # Path to custom audio file (leave empty for system beep)
+
+# If an available appointment time is found,
+# the test interval is paused by default
+pauseTimeMin: 5
+
+# Ignore the period from 23:55 to 00:05
+# If you need to schedule manually
+skip0Clock: false
+
+requestLimit:
+  enable: false
+  period: 20:15-23:15
+  interval: 5
+
+# Gmail configuration for verification code retrieval
+# IMPORTANT: Use Gmail App Password, not regular password!
+# To create app password: Google Account -> Security -> 2-Step Verification -> App passwords
+gmail:
+  enable: true                       # Set to true to enable auto booking
+  verification_timeout_minutes: 1    # 查找验证码的时间限制(分钟)
+  check_interval_seconds: 10         # 检查间隔
+  use_idle: false                    # 是否启用 IDLE
+  email: "yourname@gmail.com"        # Your Gmail address
+  password: "xxxx xxxx xxxx xxxx"    # Gmail App Password (16 chars)
+  imap_server: "imap.gmail.com"
+  imap_port: 993
+
+# Auto booking configuration
+autoBooking:
+  enable: true                       # Set to true to enable automatic booking
+  timeSelectionStrategy: "earliest"  # Options: "earliest", "best_time_slot"
+  maxRetryAttempts: 3
+  retryIntervalSeconds: 30
+  verificationCodeTimeoutMinutes: 10
+  bookingTimeWindow: "00:00-23:59"
+  exitAfterSuccess: true
+
+# Data directory configuration (relative path recommended)
+data_directory: "log/"
+
+# Quick setup guide:
+# 1. Copy this file to config.yml:  cp config.yml.example config.yml
+# 2. Fill in icbc.* with your licence info
+# 3. Fill in gmail.email and gmail.password (App Password)
+# 4. Run: python3 road.py config.yml
