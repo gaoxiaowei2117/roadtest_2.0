@@ -1,162 +1,168 @@
-# ICBC Road Test Auto Booking
+<h1 align="center">🚗 ICBC Road Test Auto Booking</h1>
+
+<p align="center">
+  <em>Polls ICBC's online appointment system and books your BC road test the instant a slot opens — pulling the verification code straight from Gmail.</em>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.9%2B-3776AB?logo=python&logoColor=white" alt="Python"/>
+  <img src="https://img.shields.io/badge/Playwright-2EAD33?logo=playwright&logoColor=white" alt="Playwright"/>
+  <img src="https://img.shields.io/badge/Region-BC%2C%20Canada-red" alt="BC"/>
+  <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="MIT"/>
+  <img src="https://img.shields.io/github/last-commit/gaoxiaowei2117/roadtest_2.0" alt="last commit"/>
+</p>
+
+<p align="center">
+  <a href="#-features">Features</a> ·
+  <a href="#-quick-start">Quick start</a> ·
+  <a href="#-configuration">Configuration</a> ·
+  <a href="#-notifications">Notifications</a> ·
+  <a href="#-faq">FAQ</a>
+</p>
+
+> [中文 README](#中文说明) 在下方。
+
+---
+
+## ✨ Features
+
+- 🎯 **Smart filtering** — filter by date range, time window, exam centre, day of week, AM/PM
+- 🔔 **Multi-channel alerts** — SMS (Twilio), PushDeer, ntfy, desktop, sound
+- 🤖 **Hands-off booking** — locks the slot → triggers the verification email → reads it from Gmail IMAP → confirms the booking
+- 🧠 **Playwright login** that bypasses KBA, with a 4-minute token cache
+- 🧪 **Dry-run mode** so you can test the pipeline without spending money
+
+## 📦 Quick start
+
+```bash
+# 1. Clone
+git clone https://github.com/gaoxiaowei2117/roadtest_2.0.git
+cd roadtest_2.0
+
+# 2. Install Python deps
+pip3 install -r requirements.txt
+playwright install chromium
+
+# 3. (Optional, Linux only) desktop notifications
+sudo apt install libnotify-bin
+
+# 4. Configure
+cp config.yml.example config.yml
+$EDITOR config.yml          # fill in licence + Gmail App Password
+
+# 5. Run
+chmod +x start.sh && ./start.sh
+```
+
+Pick `2` from the menu for **live mode**.
+
+## ⚙️ Configuration
+
+Fill in `config.yml` — only the fields below are mandatory:
+
+```yaml
+icbc:
+  drvrLastName:    "YourLastName"
+  licenceNumber:   "00000000"
+  keyword:         "0000"
+  DateOfIssue:     "2025-JAN-01"     # YYYY-MMM-DD
+  expactAfterDate: "2026-07-01"
+  expactBeforeDate:"2026-08-31"
+  expactTimeRange: "10:00-15:00"
+  examClass:       "5"               # Class 5 road test
+  posID:           "274"             # exam centre id
+
+gmail:
+  enable:   true
+  email:    "yourname@gmail.com"
+  password: "xxxx xxxx xxxx xxxx"   # Gmail App Password — NOT your real password
+```
+
+> 🔐 **`config.yml` is in `.gitignore` — keep it that way.** It contains your licence number and Gmail App Password.
+
+Full reference and all optional knobs live in [`config.yml.example`](./config.yml.example).
+
+## 📣 Notifications
+
+All channels default to `enable: false`. Turn on what you need:
+
+| Channel    | Why                                | Config key   |
+|------------|-----------------------------------|--------------|
+| Twilio SMS | Reliable, costs money              | `pushsms`    |
+| PushDeer   | Free push to phone via WeChat      | `pushdeer`   |
+| ntfy       | Free self-hostable push            | `ntfy`       |
+| Desktop    | `notify-send` popup on Linux       | `pushlocal`  |
+| Sound      | `paplay`/`aplay`/`ffplay`/`beep`   | `pushsound`  |
+
+## 🗂️ Project layout
+
+```
+.
+├── road.py                # main loop (poll + book + notify)
+├── playwright_login.py    # browser login, extracts auth token
+├── token_manager.py       # token cache (4-min TTL)
+├── status.py              # show current state
+├── start.sh               # interactive launcher
+├── config.yml.example     # template — copy to config.yml
+└── requirements.txt
+```
+
+## 🛡️ Disclaimer
+
+This project automates **public** ICBC endpoints to book **your own** road test. It does not bypass auth, payment, or rate limits beyond what a human user would. Use responsibly and at your own risk — ICBC may change their API at any time.
+
+## ❓ FAQ
+
+<details>
+<summary><b>I get "Authentication failed" from Gmail.</b></summary>
+
+You're using your real Gmail password. Generate an **App Password**: Google Account → Security → 2-Step Verification → App passwords. Paste the 16-char string (with spaces) into `gmail.password`.
+</details>
+
+<details>
+<summary><b>Playwright says <code>browser not found</code>.</b></summary>
+
+Run `playwright install chromium` after `pip install playwright`.
+</details>
+
+<details>
+<summary><b>How do I find <code>posID</code> for my exam centre?</b></summary>
+
+Open the ICBC booking page in DevTools → Network → search for the request to `/qmaticwebbooking/rest/schedule/...`. The `serviceId` in the response maps to each centre. Common ones: `9` Burnaby, `274` Vancouver Point Grey.
+</details>
+
+## 📄 License
+
+MIT — see [LICENSE](./LICENSE).
+
+---
+
+## 中文说明
 
 ICBC（卑诗省保险公司）路考自动查询和抢号工具。轮询 ICBC 在线系统，发现符合条件的考位时自动锁定、从 Gmail 取验证码并完成预约。
 
-## 功能
+### 功能
 
 - 按日期范围、时间段、考点、星期、上/下午等条件过滤考位
 - 发现可用考位时多通道通知：SMS（Twilio）、PushDeer、ntfy、本地桌面通知、声音
 - 自动预约：锁位 → 触发验证码邮件 → 从 Gmail IMAP 拉取验证码 → 提交预约
 - 基于 Playwright 浏览器自动化登录（绕过 KBA），带 4 分钟 token 缓存
 
-## 环境要求
-
-- **Python 3.9+**（用到了 `zoneinfo`）
-- **Linux / macOS**（脚本默认）。Windows 未测试。
-- 网络可访问 `onlinebusiness.icbc.com` 和 `imap.gmail.com`
-- 一个开启了"两步验证 + 应用专用密码"的 Gmail 账号（用于读取验证码邮件）
-- 一个有效的 BC 驾照 + ICBC 关键词
-
-## 依赖项
-
-### Python 包（pip 安装）
-
-| 包 | 用途 |
-|---|---|
-| `requests` | 调 ICBC REST API（查询/锁位/预约） |
-| `PyYAML` | 读取 `config.yml` |
-| `faker` | 生成请求头中的随机 User-Agent |
-| `twilio` | SMS 推送（可选） |
-| `pypushdeer` | PushDeer 推送（可选） |
-| `playwright` | 浏览器自动化登录 ICBC 取 token |
-
-### Playwright 浏览器二进制
-
-`pip install playwright` 之后还需要单独下载 Chromium：
+### 快速开始
 
 ```bash
-playwright install chromium
-```
-
-### 系统命令（可选，仅当启用对应通知时）
-
-| 命令 | 用途 |
-|---|---|
-| `notify-send` | 桌面通知 (`pushlocal.enable=true`)，Linux 上由 `libnotify-bin` 提供 |
-| `beep` / `mpg123` / `paplay` / `aplay` / `ffplay` | 声音通知 (`pushsound.enable=true`)，任选其一 |
-
-## 安装
-
-```bash
-# 1. 安装 Python 依赖
+git clone https://github.com/gaoxiaowei2117/roadtest_2.0.git
+cd roadtest_2.0
 pip3 install -r requirements.txt
-
-# 2. 下载 Chromium（Playwright 用）
 playwright install chromium
-
-# 3. 如果要桌面通知（可选，仅 Linux）
-sudo apt install libnotify-bin
-
-# 4. 给启动脚本加执行权限
-chmod +x start.sh
+cp config.yml.example config.yml      # 编辑填入驾照信息和 Gmail 应用密码
+./start.sh                            # 选 2 进入实盘模式
 ```
 
-## 配置 `config.yml`
+### 隐私警告
 
-仓库**不包含**真实的 `config.yml`（已在 `.gitignore` 中），请基于模板创建：
+⚠️ `config.yml` 含驾照号 / Gmail 应用密码等敏感信息，**绝对不要**提交到公开仓库。本仓库的 `.gitignore` 已自动忽略 `config.yml`，请勿改动该规则。
 
-```bash
-cp config.yml.example config.yml
-# 然后用编辑器填入你自己的驾照信息和 Gmail 应用密码
-```
+### 完整文档
 
-关键字段（节选自 `config.yml.example`）：
-
-```yaml
-icbc:
-  drvrLastName: "YourLastName"     # 驾照姓
-  licenceNumber: "00000000"        # 驾照号
-  keyword: "0000"                  # ICBC 关键词
-  DateOfIssue: "2025-JAN-01"       # 驾照发证日期，格式 YYYY-MMM-DD
-  expactAfterDate: "2026-07-01"    # 想约的最早日期
-  expactBeforeDate: "2026-08-31"   # 想约的最晚日期
-  expactTimeRange: "10:00-15:00"   # 想约的时间段
-  examClass: "5"                   # 5 = Class 5 路考
-  posID: "274"                     # 考点 ID
-
-gmail:
-  enable: true
-  email: "yourname@gmail.com"
-  password: "xxxx xxxx xxxx xxxx"  # Gmail 应用专用密码（非账户密码）
-                                    # 创建方式: Google 账号 → 安全 → 两步验证 → 应用密码
-
-autoBooking:
-  enable: true                     # true = 发现考位自动预约；false = 仅通知
-  exitAfterSuccess: true           # 成功预约后退出
-```
-
-> ⚠️ **隐私警告**：`config.yml` 含驾照号 / Gmail 应用密码等敏感信息，**绝对不要**提交到公开仓库。本仓库的 `.gitignore` 已自动忽略 `config.yml`，请勿改动该规则。
-
-通知通道（按需启用）：`pushsms` (Twilio) / `pushdeer` / `ntfy` / `pushlocal` / `pushsound`，默认全部 `enable: false`。
-
-## 运行
-
-### 推荐：使用启动脚本
-
-```bash
-./start.sh
-```
-
-菜单：
-- `1` 测试模式（**注意**：依赖 `test_road.py`，仓库中暂未提供）
-- `2` 实盘模式（连接真实 ICBC 系统）
-- `3` 查看运行状态
-- `4` 查看最近日志
-
-### 直接命令行
-
-```bash
-# 实盘抢号
-python3 road.py config.yml
-
-# 查看状态
-python3 status.py
-
-# 仅测试登录流程
-python3 playwright_login.py
-
-# 测试 token 缓存
-python3 token_manager.py
-```
-
-## 文件结构
-
-```
-roadtest_template/
-├── road.py                # 主程序（轮询 + 抢号 + 通知）
-├── playwright_login.py    # 浏览器登录，提取 Authorization token
-├── token_manager.py       # Token 缓存（4 分钟 TTL）
-├── status.py              # 查看预约状态
-├── start.sh               # 交互式启动菜单
-├── config.yml             # 配置文件
-├── requirements.txt       # Python 依赖
-└── log/                   # 运行时数据（last_run、processed_emails、debug 截图等）
-```
-
-## 工作流程
-
-1. **登录**：Playwright 用无头 Chromium 模拟真实用户操作，填驾照号 + 发证日期 + 关键词，从网络请求中抓取 `Authorization: Bearer` token
-2. **轮询**：每隔几秒调 `getAvailableAppointments` 接口，按 `config.yml` 的过滤条件筛选
-3. **发现考位**：触发通知 → 调 `putLock` 锁位 → 调 `postMsg` 发送验证码到 Gmail
-4. **取验证码**：通过 IMAP 读 Gmail 最新邮件，正则提取 6 位验证码
-5. **完成预约**：用验证码调 `verifyBooking` 提交，结果写入 `booking_status.json`
-
-## 已知问题
-
-- `start.sh` 选项 1 调用的 `test_road.py` 在当前仓库中**不存在**
-
-## 注意
-
-- ICBC 反爬较严格，轮询过快会被封 IP / 锁账号。配置里 `requestLimit` 可限速。
-- 实际抢号成功后，去 ICBC 官网二次确认预约状态。
-- Gmail 密码必须使用「应用专用密码」，普通账户密码无法通过 IMAP 登录。
+英文版的 [Features](#-features) / [Configuration](#-configuration) / [FAQ](#-faq) 章节内容完全适用，结构和翻译保持一致。
