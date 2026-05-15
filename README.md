@@ -1,3 +1,11 @@
+> # ⚠️ Deprecated — moved to a newer version
+>
+> **👉 Use [`icbc-roadtest-auto-booking`](https://github.com/gaoxiaowei2117/icbc-roadtest-auto-booking) instead** — bilingual docs, better-organised code, more features.
+>
+> This repo is kept here for history and is **archived (read-only)**. No further updates will land here.
+
+---
+
 <h1 align="center">🚗 ICBC Road Test Auto Booking</h1>
 
 <p align="center">
